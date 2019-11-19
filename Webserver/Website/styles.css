@@ -1,0 +1,51 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    background-color: burlywood;
+    font-size: 14px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.wrapper {
+    margin: 0 auto;
+    width: 90%;
+    height: 100vh;
+    overflow: visible;
+    background-color: gainsboro;
+}
+h1 {
+    color: blueviolet;
+    text-align: center;
+    font-size: larger;
+    padding: 10px 0;
+    font-weight: 900;
+}
+.gallery {
+    align-self: center;
+    margin: 30px 0;
+    display: inline-block;
+}
+.container {
+    padding: 10px;
+    width: 150px;
+    display: inline-block;
+    text-align: center;
+    overflow-wrap: break-word;
+}
+.container label {
+    white-space: pre-wrap;
+}
+.container img {
+    width: 100px;
+    height: auto;
+    margin: 10px 0;
+    align-self: center;
+    clear: both;
+}
+.container a {
+    color: cornflowerblue;
+    text-decoration: none;
+    font-weight: 500;
+    display: block;
+}

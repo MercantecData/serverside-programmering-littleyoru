@@ -1,0 +1,47 @@
+CREATE DATABASE BookingSystem
+
+USE BookingSystem
+
+CREATE TABLE Rooms (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nr VARCHAR(10) NOT NULL,
+    Alias VARCHAR(50) NULL,
+    Floor INT NOT NULL
+)
+
+
+INSERT INTO Rooms (Nr, Alias, Floor) VALUES 
+('A29', 'Meeting', 0), ('A30', 'Steve Jobs', 0),
+('A31', 'Bill Gates', 0), ('A33', 'Alan Turing', 0),
+('C01', 'Group', 0), ('A1.38', 'Square', 1),
+('A1.39', 'Glass', 1), ('A1.40', '', 1),
+('A1.41', 'Linus Torvalds', 1)
+
+
+
+CREATE TABLE Users (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(50) NOT NULL,
+    Initials VARCHAR(4) NULL
+)
+
+
+
+INSERT INTO Users (Name, Initials) VALUES
+('Mads', 'MB'), ('Jakup', 'JK'), ('Bjarne', 'BJ'),
+('Bjarke', 'BK'), ('Jesper', 'JS'), ('Henrik', 'HK')
+
+
+
+
+CREATE TABLE Bookings (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    BookDate DATETIME NOT NULL,
+    Subject VARCHAR(50) NOT NULL,
+    RoomId INT NOT NULL,
+    UserId INT NOT NULL,
+    FOREIGN KEY (RoomId) REFERENCES Rooms(Id),
+    FOREIGN KEY (UserId) REFERENCES Users(Id)
+)
+
+

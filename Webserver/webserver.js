@@ -14,7 +14,10 @@ const mimeTypes = {
     '.svg': 'image/svg+xml',
     '.json': 'application/json',
     '.woff': 'font/woff',
-    '.woff2': 'font/woff2'
+    '.woff2': 'font/woff2',
+    '.pdf': 'application/pdf',
+    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    '.txt': 'text/plain'
 }
 
 const webserver = http.createServer((req, res) => {

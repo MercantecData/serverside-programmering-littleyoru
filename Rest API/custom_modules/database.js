@@ -1,7 +1,8 @@
+const mysql = require('mysql')
+const utils = require('./utils')
 
+// create database connection
 exports.dbConnect = (user, password, database, host, server) => {
-
-    const mysql = require('mysql')
 
     var conn = mysql.createConnection({
         user: user,
@@ -17,3 +18,4 @@ exports.dbConnect = (user, password, database, host, server) => {
         server(conn)
     })
 }
+

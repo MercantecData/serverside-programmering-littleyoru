@@ -1,17 +1,22 @@
 const GETROOMS = String.raw`SELECT * FROM Rooms`
 const GETUSERS = String.raw`SELECT * FROM Users`
-const GETBOOKINGSTODAY = String.raw`SELECT * FROM Bookings WHERE DATE(BookDate) = CURDATE()`
-let day = 14
-const GETBOOKINGSCUSTOM = String.raw`SELECT * FROM Bookings WHERE DAY(BookDate) = ${day}`
-const ADDBOOKING = String.raw``
+const GETBOOKINGSTODAY = String.raw`SELECT * FROM Bookings WHERE DATE(BookDate) = CURRENT_DATE()`
+let day = 26
+const GETBOOKINGSCUSTOM = (day) => String.raw`SELECT * FROM Bookings WHERE DAY(BookDate) = ${day}`
+const ADDBOOKING = String.raw`INSERT INTO Bookings (BookDate, RoomId, UserId) VALUES (CURRENT_TIMESTAMP - INTERVAL 1 DAY, 1, 2)`
 
-exports.handleQuery = (path, param) => {
+exports.handleQuery = (path, params) => {
     switch (path) {
         case '/rooms':
             return GETROOMS
         case '/users':
             return GETUSERS
         case '/bookings':
+            if (params !== null) {
+                let dayParam = params['day']
+                console.log('dayParam ', dayParam)
+                return GETBOOKINGSCUSTOM(dayParam)
+            }
             return GETBOOKINGSTODAY
         default:
             return false
@@ -20,7 +25,8 @@ exports.handleQuery = (path, param) => {
 } 
 
 // method to return different error messages depending on error number
-exports.handleError = (err, res) => {
+exports.handleError = (err, res = undefined) => {
+    console.log('error in handleError ', err)
     let errInfo = {
         nr: err.errno,
         msg: err.code
@@ -60,39 +66,35 @@ exports.geDataOrError = (data, err) => {
 }
 
 exports.getData = (data) => {
-    return JSON.stringify(data)
+    return data
 }
 
 
 
 // return results of a query
-exports.queryResult = (query, con) => {
+exports.queryResult = async (query, con) => {
     console.log('query ', JSON.stringify(query))
     let newQuery = JSON.stringify(query)
 
-    let callback = (err, data) => {
-        if (err) {
-            console.log('err in callback ', err)
-            this.handleError(err)
-        } else {
-            console.log('return data')
-            return data
-        }
+    return new Promise((getData, handleError) => {
+        con.query(query, (err, data) => {
+            if (err) {
+                console.log('err in callback ', err)
+                handleError(err)
+            } else {
+                console.log('return data ', JSON.stringify(data))
+                getData(data)
+            }
+        })
+    }).catch(error => console.log('error in catch ', error))
 
-    }
-    // con.query(param, (err, data) => {
-    //     if (err)
-    //         this.handleError(err)
-    //     else
-    //         return data
-    // })
-    const dbQuery = (q) => new Promise(resolve => con.query(q, resolve))
+    
+    // const dbQuery = (q) => new Promise((resolve, reject) => con.query(q, resolve))
 
-    dbQuery(newQuery).then(callback).catch((error) => console.log('error ', error))
+    // dbQuery(newQuery).then(callback).catch((error) => console.log('error ', error))
 
-    // con.query(query).then(result => {
-    //     console.log('await result ', result)
-    // })
+
+
 
 }
 

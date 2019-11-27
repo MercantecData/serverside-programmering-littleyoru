@@ -8,34 +8,50 @@ exports.initServer = (port, con) => {
     http.createServer(async (req, res) => {
         var parsedUrl = url.parse(req.url, true)
         let pathName = parsedUrl.pathname
-        let params = parsedUrl.query
 
-        console.log('params ', JSON.stringify(params))
         console.log('url ', parsedUrl)
         console.log('pathName ', pathName)
+        console.log('method ', req.method)
 
-        let found = utils.handleQuery(pathName, params)
+        // check if post request
+        if (req.method === 'POST') {
+            let found = utils.handleQuery('post', pathName)
+            if (!found) {
+                res.statusCode = 404
+                res.statusMessage = 'Page not found'
+                res.write('Page not found')
+                res.end()
+            } else {
+                res.setHeader('Content-Type', 'text/plain')
+                await utils.queryResult(found, con)
+                res.end('Post request successful')
+            }
 
-        // cookies
-        // res.setHeader('Set-Cookie', 'foo=bar')
+        } // else
+        else {
+            let params = parsedUrl.query
+            console.log('params ', JSON.stringify(params))
 
-        console.log('found ', found)
-        if (!found) {
-            res.statusCode = 404
-            res.statusMessage = 'Page not found'
-            res.write('Page not found')
-        } else {
-            res.setHeader('Content-Type', 'text/json')
-            res.end(JSON.stringify(await utils.queryResult(found, con)))
+            let found = utils.handleQuery('get', pathName, params)
 
-            // utils.queryResult(found, con).then(result => {
-            //     console.log('test result ', result)
-            //     res.write(result)
-            //     res.end()}, 
-            // err => {
-            //     console.log('error in promise - ', err)
-            //     res.end()})
+            // cookies
+            // res.setHeader('Set-Cookie', 'foo=bar')
+
+            console.log('found ', found)
+            if (!found) {
+                res.statusCode = 404
+                res.statusMessage = 'Page not found'
+                res.write('Page not found')
+                res.end()
+                
+            } else {
+                res.setHeader('Content-Type', 'text/json')
+                res.end(JSON.stringify(await utils.queryResult(found, con)))
+
+            }
         }
+
+        
         
     }).listen(port)
 }

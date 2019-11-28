@@ -1,6 +1,9 @@
 
 exports.handleError = (err) => {
-    switch(err.errno) {
-        
-    }
+    
+}
+
+
+exports.parseCookieArray = (cookies) => {
+
 }

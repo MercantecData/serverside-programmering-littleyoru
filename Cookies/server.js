@@ -8,7 +8,11 @@ http.createServer((req, res) => {
     console.log('cookie from browser ', cookie)
 
     // set cookie
-    res.setHeader('Set-Cookie', 'cookie1=christmas cookie; cookie2=apple pie')
+    let cookies = [
+        'cookie1=christmas cookie',
+        'cookie2=apple pie'
+    ]
+    res.setHeader('Set-Cookie', cookies)
     res.end()
 
 }).listen(8081)

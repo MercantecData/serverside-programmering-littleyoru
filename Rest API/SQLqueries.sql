@@ -38,7 +38,7 @@ INSERT INTO Users (Name, Initials) VALUES
 CREATE TABLE Bookings (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     BookDate DATETIME NOT NULL,
-    Subject VARCHAR(50) NOT NULL,
+    Subject VARCHAR(50) NULL DEFAULT 'P',
     RoomId INT NOT NULL,
     UserId INT NOT NULL,
     FOREIGN KEY (RoomId) REFERENCES Rooms(Id),

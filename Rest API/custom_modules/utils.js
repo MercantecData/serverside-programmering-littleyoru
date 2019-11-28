@@ -9,7 +9,7 @@ WHERE DATE(b.BookDate) = CURRENT_DATE()`
 const GETBOOKINGSCUSTOM = (day) => String.raw`SELECT b.BookDate, r.Nr, r.Alias, u.Name FROM Bookings b
 INNER JOIN Rooms r ON b.RoomId = r.Id
 INNER JOIN Users u ON b.UserId = u.Id
-WHERE DAY(b.BookDate) = ${day}`
+WHERE DAY(b.BookDate) = ${day} AND MONTH(B.BookDate) = MONTH(CURRENT_DATE) AND YEAR(b.BookDate) = YEAR(CURRENT_DATE)`
 
 const ADDBOOKING = String.raw`INSERT INTO Bookings (BookDate, RoomId, UserId) VALUES (CURRENT_TIMESTAMP, 2, 2)`
 

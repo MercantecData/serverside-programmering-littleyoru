@@ -1,31 +1,51 @@
 const GETROOMS = String.raw`SELECT * FROM Rooms`
 const GETUSERS = String.raw`SELECT * FROM Users`
-const GETBOOKINGSTODAY = String.raw`SELECT * FROM Bookings WHERE DATE(BookDate) = CURDATE()`
-let day = 14
-const GETBOOKINGSCUSTOM = String.raw`SELECT * FROM Bookings WHERE DAY(BookDate) = ${day}`
-const ADDBOOKING = String.raw``
 
-exports.handleQuery = (path, param) => {
+const GETBOOKINGSTODAY = String.raw`SELECT b.BookDate, r.Nr, r.Alias, u.Name FROM Bookings b
+INNER JOIN Rooms r ON b.RoomId = r.Id
+INNER JOIN Users u ON b.UserId = u.Id
+WHERE DATE(b.BookDate) = CURRENT_DATE()`
+
+const GETBOOKINGSCUSTOM = (day) => String.raw`SELECT b.BookDate, r.Nr, r.Alias, u.Name FROM Bookings b
+INNER JOIN Rooms r ON b.RoomId = r.Id
+INNER JOIN Users u ON b.UserId = u.Id
+WHERE DAY(b.BookDate) = ${day} AND MONTH(B.BookDate) = MONTH(CURRENT_DATE) AND YEAR(b.BookDate) = YEAR(CURRENT_DATE)`
+
+const ADDBOOKING = String.raw`INSERT INTO Bookings (BookDate, RoomId, UserId) VALUES (CURRENT_TIMESTAMP, 2, 2)`
+
+// method to return the query to execute for different paths
+exports.handleQuery = (method, path, params) => {
     switch (path) {
         case '/rooms':
             return GETROOMS
         case '/users':
             return GETUSERS
         case '/bookings':
+            if (Object.keys(params).length > 1) {
+                let dayParam = params['day']
+                return GETBOOKINGSCUSTOM(dayParam)
+            }
             return GETBOOKINGSTODAY
+        case '/add':
+            if (method === 'post')
+                return ADDBOOKING
+            else return false
         default:
             return false
     }
+}
 
-} 
 
 // method to return different error messages depending on error number
-exports.handleError = (err, res) => {
+exports.handleError = (err, res = null) => {
     let errInfo = {
         nr: err.errno,
         msg: err.code
     }
     switch (errInfo.nr) {
+        case 400:
+            errInfo,msg = 'Bad request!'
+            break
         case 404:
             errInfo.msg = 'Page not found! Check url.'
             break
@@ -45,54 +65,51 @@ exports.handleError = (err, res) => {
             errInfo.msg = 'Unkown error.'
             break
     }
-    if (res) {
-        res.writeHead(404, JSON.stringify(errInfo.msg), {'Content-Type': 'text/plain'})
+    if (res !== null) {
+        res.setHeader('Content-Type', 'text/plain')
+        res.statusCode = err.errno
+        res.statusMessage = JSON.stringify(errInfo.msg)
         res.end()
-        console.log(JSON.stringify(errInfo.msg))
     }
 }
-
-
-exports.geDataOrError = (data, err) => {
-    if (err)  this.handleError(err)
-    console.log('data ', JSON.stringify(data))
-    return JSON.stringify(data)
-}
-
-exports.getData = (data) => {
-    return JSON.stringify(data)
-}
-
 
 
 // return results of a query
-exports.queryResult = (query, con) => {
-    console.log('query ', JSON.stringify(query))
-    let newQuery = JSON.stringify(query)
+exports.queryResult = async (query, con) => {
 
-    let callback = (err, data) => {
-        if (err) {
-            console.log('err in callback ', err)
-            this.handleError(err)
-        } else {
-            console.log('return data')
-            return data
-        }
+    return new Promise((resolve, reject) => {
+        con.query(query, (err, data) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(data)
+            }
+        })
+    }).catch(error => {
+        this.handleError(error)
+    })
 
-    }
-    // con.query(param, (err, data) => {
-    //     if (err)
-    //         this.handleError(err)
-    //     else
-    //         return data
-    // })
-    const dbQuery = (q) => new Promise(resolve => con.query(q, resolve))
+}
 
-    dbQuery(newQuery).then(callback).catch((error) => console.log('error ', error))
+exports.dataFound = (data) => {
+    let dataNull = (data !== undefined && data !== null && data.length > 0)
+    return dataNull
+}
 
-    // con.query(query).then(result => {
-    //     console.log('await result ', result)
-    // })
+// check api permissions
+exports.hasPermission = async (key, con) => {
+    return new Promise((resolve, reject) => {
+        let permQuery = String.raw`SELECT * FROM Tokens WHERE TokenName = '${key}'`
+        con.query(permQuery, (err, data) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(this.dataFound(data))
+            }
+        })
+    }).catch(error => {
+        this.handleError(error)
+    })
 
 }
 

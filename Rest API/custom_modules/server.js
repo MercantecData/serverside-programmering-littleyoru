@@ -5,29 +5,67 @@ exports.initServer = (port, con) => {
     var http = require('http')
     var url = require('url')
 
-    http.createServer((req, res) => {
+    let sendNotAllowedResponse = function(res) {
+        res.setHeader('Content-Type', 'text/plain')
+        res.statusCode = 403
+        res.statusMessage = "You don't have permission to access the API!"
+        res.end(res.statusMessage)
+    }
+
+    http.createServer(async (req, res) => {
+
         var parsedUrl = url.parse(req.url, true)
         let pathName = parsedUrl.pathname
+        let params = parsedUrl.query
 
-        console.log('url ', parsedUrl)
-        console.log('pathName ', pathName)
-
-        let found = utils.handleQuery(pathName)
-
-        // cookies
-        // res.setHeader('Set-Cookie', 'foo=bar')
-
-        console.log('found ', found)
-        if (!found) {
-            res.statusCode = 404
-            res.statusMessage = 'Page not found'
-            res.write('Page not found')
-            // utils.handleError(err, res)
+        // check key for permission to use api
+        if (Object.keys(params).length > 0 && params['key']) {
+            let hasPerm = await utils.hasPermission(params['key'], con)
+            // key not found in database
+            if (!hasPerm) {
+                sendNotAllowedResponse(res)
+                return
+            }
+        // no key in url
         } else {
-            res.writeHead(200, 'Success', {'Content-Type': 'textx/plain'})
-            res.write(utils.queryResult(found, con))
+            sendNotAllowedResponse(res)
+            return
         }
-        
+
+        // check if post request
+        if (req.method === 'POST') {
+            let found = utils.handleQuery('post', pathName)
+            if (!found) {
+                res.statusCode = 404
+                res.statusMessage = 'Page not found'
+                res.write('Page not found')
+                res.end()
+            } else {
+                res.setHeader('Content-Type', 'text/plain')
+                await utils.queryResult(found, con)
+                res.end('Post request successful')
+            }
+
+        } else {
+            let found = utils.handleQuery('get', pathName, params)
+            // cookies
+            // res.setHeader('Set-Cookie', 'foo=bar')
+
+            if (!found) {
+                res.statusCode = 404
+                res.statusMessage = 'Page not found'
+                res.end('Page not found')
+
+            } else {
+                console.log('finished', res.finished);
+                if (res.finished) {
+                    return
+                }
+                res.setHeader('Content-Type', 'text/json')
+                res.end(JSON.stringify(await utils.queryResult(found, con)))
+            }
+        }
+
     }).listen(port)
 }
 

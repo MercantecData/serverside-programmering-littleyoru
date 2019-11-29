@@ -1,12 +1,14 @@
 const http = require('http')
 const url = require('url')
+const utils = require('./custom_modules/utils')
 
 http.createServer((req, res) => {
 
     // check cookie
     let cookie = req.headers.cookie
     console.log('cookie from browser ', cookie)
-    
+    let cookieList = utils.makeCookiesObject(cookie)
+    console.log(cookieList)
 
     // set cookie
     let cookies = [

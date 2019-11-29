@@ -14,7 +14,7 @@ exports.dbConnect = (user, password, database, host, server) => {
     conn.connect((err) => {
         if (err) {
             console.log('db error ', err.code)
-        } //handlerError(err)
+        }
         server(conn)
     })
 }

@@ -1,9 +1,4 @@
 
-exports.handleError = (err) => {
-    
-}
-
-
 exports.makeCookiesObject = (cookies) => {
     let cookieList = {}
     cookies.split(';').forEach((c) => {

@@ -1,6 +1,8 @@
 REST API Info
 -------------
 
+- booking of rooms for school lectures
+
 
 API KEY: 202cb962ac59075b964b07152d234b70
 

@@ -1,5 +1,6 @@
 # Serverside Programmering
-Af Elena Ene
+by Elena Ene
+- experimenting with pure node js servers and rest api
 
 
 Assignments status:
